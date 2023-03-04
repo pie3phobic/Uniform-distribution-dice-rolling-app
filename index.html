@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Dice Rolling Game</title>
+  </head>
+  <body>
+    <main>
+      <section class="player player--0 player--active">
+        <div class="chartBox">
+          <canvas id="myChart"></canvas>
+        </div>
+      </section>
+      <p class="rolledNum">Rolled times:</p>
+      <img src="dice-5.png" alt="Playing dice" class="cube" />
+      <button class="btn btn--roll">🎲 Roll dice</button>
+      <button class="btn btn--100roll">🎲 Roll dice 100 times!</button>
+      <button class="btn btn--1000roll">🎲 Roll dice 1000 times!</button>
+      <button class="btn btn--frequency">Frequency & Statistics</button>
+      <button class="btn btn--new">🔄 Restart</button>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      const btnRoll = document.querySelector(".btn--roll");
+      const btn100Roll = document.querySelector(".btn--100roll");
+      const btn1000Roll = document.querySelector(".btn--1000roll");
+      const btnFrequency = document.querySelector(".btn--frequency");
+      const btnNew = document.querySelector(".btn--new");
+      const diceEl = document.querySelector(".cube");
+      let numOfRolls = 0;
+      const ctx = document.getElementById("myChart").getContext("2d");
+      const myChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: [1, 2, 3, 4, 5, 6],
+          datasets: [
+            {
+              label: "# of Rolls",
+              data: [0, 0, 0, 0, 0, 0],
+              backgroundColor: [
+                "rgba(255, 99, 132, 0.2)",
+                "rgba(54, 162, 235, 0.2)",
+                "rgba(255, 206, 86, 0.2)",
+                "rgba(75, 192, 192, 0.2)",
+                "rgba(153, 102, 255, 0.2)",
+                "rgba(255, 159, 64, 0.2)",
+              ],
+              borderColor: [
+                "rgba(255, 99, 132, 1)",
+                "rgba(54, 162, 235, 1)",
+                "rgba(255, 206, 86, 1)",
+                "rgba(75, 192, 192, 1)",
+                "rgba(153, 102, 255, 1)",
+                "rgba(255, 159, 64, 1)",
+              ],
+              borderWidth: 1,
+              barPercentage: 1,
+              categoryPercentage: 1,
+            },
+          ],
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
+          },
+        },
+      });
+      btnRoll.addEventListener("click", function () {
+        // 1.
+        const dice = Math.trunc(Math.random() * 6) + 1;
+        console.log(dice);
+        // 2.
+        diceEl.style.visibility = "visible";
+        diceEl.src = `dice-${dice}.png`;
+        numOfRolls += 1;
+        myChart.config.data.datasets[0].data[dice - 1] += 1;
+        document.querySelector(
+          ".rolledNum"
+        ).textContent = `Rolled Times: ${numOfRolls}`;
+        myChart.update();
+      });
+      btn100Roll.addEventListener("click", function () {
+        for (let i = 1; i <= 100; i++) {
+          const dice = Math.trunc(Math.random() * 6) + 1;
+          diceEl.style.visibility = "visible";
+          diceEl.src = `dice-${dice}.png`;
+          myChart.config.data.datasets[0].data[dice - 1] += 1;
+        }
+        numOfRolls += 100;
+        document.querySelector(
+          ".rolledNum"
+        ).textContent = `Rolled Times: ${numOfRolls}`;
+        myChart.update();
+      });
+      btn1000Roll.addEventListener("click", function () {
+        for (let i = 1; i <= 1000; i++) {
+          const dice = Math.trunc(Math.random() * 6) + 1;
+
+          diceEl.style.visibility = "visible";
+          diceEl.src = `dice-${dice}.png`;
+          myChart.config.data.datasets[0].data[dice - 1] += 1;
+        }
+        numOfRolls += 1000;
+        document.querySelector(
+          ".rolledNum"
+        ).textContent = `Rolled Times: ${numOfRolls}`;
+        myChart.update();
+      });
+      btnFrequency.addEventListener("click", function () {
+        let matSpodiv = 0;
+        let variance = 0;
+        let standartDev = 0;
+        for (let n = 0; n <= 5; n++) {
+          myChart.config.data.datasets[0].data[n] /= numOfRolls;
+          matSpodiv +=
+            myChart.data.labels[n] * myChart.data.datasets[0].data[n];
+          variance +=
+            Math.pow(myChart.data.labels[n], 2) *
+            myChart.data.datasets[0].data[n];
+        }
+        variance -= Math.pow(matSpodiv, 2);
+        standartDev = Math.sqrt(variance);
+        myChart.config.data.datasets[0].label = "Frequency of roll";
+        myChart.update();
+
+        document.querySelector(
+          ".rolledNum"
+        ).textContent = `Rolled Times: ${numOfRolls}
+         Mat. spodiv: ${matSpodiv}\n\n Variance: ${variance}\n\n Standard deviation: ${standartDev}`;
+
+        diceEl.style.visibility = "hidden";
+        console.log(`Mat spodiv: ${matSpodiv}`);
+        console.log(myChart.data.datasets[0].data);
+        console.log(`Variance: ${variance}`);
+        console.log(`Standart deviation: ${standartDev}`);
+      });
+      btnNew.addEventListener("click", function () {
+        numOfRolls = 0;
+        matSpodiv = 0;
+        variance = 0;
+        standartDev = 0;
+        document.querySelector(
+          ".rolledNum"
+        ).textContent = `Rolled Times: ${numOfRolls}`;
+        for (let k = 0; k <= 5; k++) {
+          myChart.config.data.datasets[0].data[k] = 0;
+        }
+        myChart.config.data.datasets[0].label = "# of Rolls";
+        myChart.update();
+      });
+    </script>
+  </body>
+</html>
